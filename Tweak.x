@@ -85,6 +85,13 @@ static void _populateAllShapeSublayers(CALayer *layer, NSMutableArray *arr) {
 	}
 }
 
+static NSString *_getVolumeControllerPackageName() {
+	static MediaControlsVolumeController *controller=nil;
+	if(!controller)
+		controller=[%c(MediaControlsVolumeController) new];
+	return [controller packageNameForRouteType:0 isRTL:NO isSlider:YES];
+}
+
 %hook MRUNowPlayingRoutingButton
 
 - (void)updatePackage {
@@ -94,10 +101,7 @@ static void _populateAllShapeSublayers(CALayer *layer, NSMutableArray *arr) {
 
 - (void)updatePackageState {
 	if([self deviceType]==0&&[self isActive]) {
-		CCUIModuleInstanceManager *mMgr=[%c(CCUIModuleInstanceManager) sharedInstance];
-		CCUIModuleInstance *mInstance=[mMgr instanceForModuleIdentifier:@"com.apple.mediaremote.controlcenter.audio"];
-		MediaControlsVolumeController *volCon=[[[mInstance module] contentViewController] volumeController];
-		NSString *pkgname=[volCon packageNameForRouteType:0 isRTL:NO isSlider:YES];
+		NSString *pkgname=_getVolumeControllerPackageName();
 		NSString *pkgdescname=[[[[[self packageView] packageDescription] packageURL] lastPathComponent] stringByDeletingPathExtension];
 		if(pkgdescname&&[pkgdescname isEqualToString:pkgname]) {
 			return %orig;
