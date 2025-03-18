@@ -2,6 +2,7 @@
 
 @interface NSBundle ()
 + (instancetype)mediaControlsBundle;
++ (instancetype)mediaRemoteUIBundle;
 @end
 
 @interface CCUICAPackageDescription : NSObject
@@ -73,6 +74,17 @@
 - (void)updatePackage;
 @end
 
+@interface MRUOutputDeviceAsset : NSObject
+- (CCUICAPackageDescription *)packageDescription;
+- (NSString *)packageNameForAssetType:(NSInteger)type;
+- (NSInteger)type;
+@end
+
+@interface MRUSystemOutputDeviceRouteController : NSObject
+- (MRUOutputDeviceAsset *)systemOutputDeviceAsset;
++ (instancetype)sharedController;
+@end
+
 static void _populateAllShapeSublayers(CALayer *layer, NSMutableArray *arr) {
 	NSArray *subs=layer.sublayers;
 	//if(!subs)
@@ -85,11 +97,27 @@ static void _populateAllShapeSublayers(CALayer *layer, NSMutableArray *arr) {
 	}
 }
 
-static NSString *_getVolumeControllerPackageName() {
+static CCUICAPackageDescription *_getVolumeControllerPackageDesc(NSString **name) {
+	static int hasMRURouteController=-1;
+	static MRUSystemOutputDeviceRouteController *routeController=nil;
 	static MediaControlsVolumeController *controller=nil;
-	if(!controller)
-		controller=[%c(MediaControlsVolumeController) new];
-	return [controller packageNameForRouteType:0 isRTL:NO isSlider:YES];
+	if(hasMRURouteController==-1) {
+		if((routeController=[objc_getClass("MRUSystemOutputDeviceRouteController") sharedController]))
+			hasMRURouteController=1;
+		else {
+			hasMRURouteController=0;
+			controller=[%c(MediaControlsVolumeController) new];
+		}
+	}
+	if(hasMRURouteController) {
+		MRUOutputDeviceAsset *asset=[routeController systemOutputDeviceAsset];
+		CCUICAPackageDescription *ret=[asset packageDescription];
+		//*name=[[[ret packageURL] lastPathComponent] stringByDeletingPathExtension];
+		*name=[asset packageNameForAssetType:[asset type]];
+		return ret;
+	}
+	*name=[controller packageNameForRouteType:0 isRTL:NO isSlider:YES];
+	return [%c(CCUICAPackageDescription) descriptionForPackageNamed:*name inBundle:[NSBundle mediaControlsBundle]];
 }
 
 %hook MRUNowPlayingRoutingButton
@@ -101,12 +129,12 @@ static NSString *_getVolumeControllerPackageName() {
 
 - (void)updatePackageState {
 	if([self deviceType]==0&&[self isActive]) {
-		NSString *pkgname=_getVolumeControllerPackageName();
+		NSString *pkgname;
+		CCUICAPackageDescription *pkgdesc=_getVolumeControllerPackageDesc(&pkgname);
 		NSString *pkgdescname=[[[[[self packageView] packageDescription] packageURL] lastPathComponent] stringByDeletingPathExtension];
 		if(pkgdescname&&[pkgdescname isEqualToString:pkgname]) {
 			return %orig;
 		}
-		CCUICAPackageDescription *pkgdesc=[%c(CCUICAPackageDescription) descriptionForPackageNamed:pkgname inBundle:[NSBundle mediaControlsBundle]];
 		[[self packageView] setPackageDescription:pkgdesc];
 		CAPackage *package=[[self packageView] package];
 		if(!package) {
