@@ -111,10 +111,10 @@ static CCUICAPackageDescription *_getVolumeControllerPackageDesc(NSString **name
 	}
 	if(hasMRURouteController) {
 		MRUOutputDeviceAsset *asset=[routeController systemOutputDeviceAsset];
-		CCUICAPackageDescription *ret=[asset packageDescription];
+		//CCUICAPackageDescription *ret=[asset packageDescription];
 		//*name=[[[ret packageURL] lastPathComponent] stringByDeletingPathExtension];
 		*name=[asset packageNameForAssetType:[asset type]];
-		return ret;
+		return [%c(CCUICAPackageDescription) descriptionForPackageNamed:*name inBundle:[NSBundle mediaRemoteUIBundle]];
 	}
 	*name=[controller packageNameForRouteType:0 isRTL:NO isSlider:YES];
 	return [%c(CCUICAPackageDescription) descriptionForPackageNamed:*name inBundle:[NSBundle mediaControlsBundle]];
