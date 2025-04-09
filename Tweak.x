@@ -166,7 +166,8 @@ static CCUICAPackageDescription *_getVolumeControllerPackageDesc(NSString **name
 			CAStateSetValue *ssv=[%c(CAStateSetValue) new];
 			[ssv setTarget:rootLayer];
 			[ssv setKeyPath:@"cornerRadius"];
-			ssv.value=@18;
+			ssv.value=[NSNumber numberWithInt:rootLayer.bounds.size.width/2];
+			//ssv.value=@18;
 			[stateops addObject:ssv];
 		}
 		{
