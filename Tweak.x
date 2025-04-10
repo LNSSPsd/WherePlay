@@ -82,6 +82,8 @@
 
 @interface MRUSystemOutputDeviceRouteController : NSObject
 - (MRUOutputDeviceAsset *)systemOutputDeviceAsset;
+- (id)systemOutputDeviceRoute;
+- (NSInteger)outputDeviceAssetTypeForDeviceRoute:(id)route;
 + (instancetype)sharedController;
 @end
 
@@ -113,7 +115,7 @@ static CCUICAPackageDescription *_getVolumeControllerPackageDesc(NSString **name
 		MRUOutputDeviceAsset *asset=[routeController systemOutputDeviceAsset];
 		//CCUICAPackageDescription *ret=[asset packageDescription];
 		//*name=[[[ret packageURL] lastPathComponent] stringByDeletingPathExtension];
-		*name=[asset packageNameForAssetType:[asset type]];
+		*name=[asset packageNameForAssetType:[routeController outputDeviceAssetTypeForDeviceRoute:[routeController systemOutputDeviceRoute]]];
 		return [%c(CCUICAPackageDescription) descriptionForPackageNamed:*name inBundle:[NSBundle mediaRemoteUIBundle]];
 	}
 	*name=[controller packageNameForRouteType:0 isRTL:NO isSlider:YES];
@@ -181,7 +183,7 @@ static CCUICAPackageDescription *_getVolumeControllerPackageDesc(NSString **name
 		onSelectedState.name=@"on selected";
 		onSelectedState.elements=stateops;
 		rootLayer.states=@[onState,onSelectedState];
-		rootLayer.sublayerTransform=CATransform3DMakeScale(0.7,0.7,1);
+		//rootLayer.sublayerTransform=CATransform3DMakeScale(0.7,0.7,1);
 		//[[self packageView] setPackageDescription:pkgdesc];
 		//[[self packageView] setPackage:package];
 		//[[self packageView] setScale:0.6];
