@@ -183,7 +183,7 @@ static CCUICAPackageDescription *_getVolumeControllerPackageDesc(NSString **name
 		onSelectedState.name=@"on selected";
 		onSelectedState.elements=stateops;
 		rootLayer.states=@[onState,onSelectedState];
-		//rootLayer.sublayerTransform=CATransform3DMakeScale(0.7,0.7,1);
+		rootLayer.sublayerTransform=CATransform3DMakeScale(0.7,0.7,1);
 		//[[self packageView] setPackageDescription:pkgdesc];
 		//[[self packageView] setPackage:package];
 		//[[self packageView] setScale:0.6];
